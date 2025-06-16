@@ -62,12 +62,13 @@ export default function Navbar() {
           </Link>
 
           <div>
-            <Link href='/pricing' className='bg-[#FFFFFF] text-gray-700 font-semibold border-gray-300 hover:bg-gray-50 flex items-center rounded-4xl px-5 py-2.5'>
+            <Link
+              href='/pricing'
+              className='bg-[#FFFFFF] text-gray-700 font-semibold border-gray-300 hover:bg-gray-50 flex items-center rounded-4xl px-5 py-2.5'
+            >
               Upgrade Your Plan
               <ArrowUpRight className='w-4 h-4 ml-2' />
             </Link>
-
-            {/*  */}
           </div>
 
           {/* Desktop Navigation */}
@@ -91,7 +92,10 @@ export default function Navbar() {
                   <div className='absolute right-0 mt-2 w-64 lg:w-72 bg-white rounded-xl shadow-lg border border-gray-200 py-5 z-50'>
                     {/* User Info */}
                     <div className='px-4 py-3 border-b border-gray-100'>
-                      <Link href='/profile' className='flex items-center space-x-3'>
+                      <Link
+                        href='/profile'
+                        className='flex items-center space-x-3'
+                      >
                         <Image
                           src='/user.jpg'
                           alt='Profile'
