@@ -6,8 +6,9 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 
-export default function SignInPage() {
+export default function SignUpPage() {
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
     remember: false,
@@ -20,6 +21,9 @@ export default function SignInPage() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
+    if (!formData.name.trim()) {
+      newErrors.name = "name is required";
+    }
     if (!formData.email.trim()) {
       newErrors.email = "email is required";
     }
@@ -84,7 +88,7 @@ export default function SignInPage() {
         {/* Form Section */}
         <div className='w-full md:w-1/2 max-w-xl mx-auto bg-background px-6 py-16 rounded-xl'>
           <div className='text-center mb-6'>
-            <h1 className='text-[32px] font-bold text-primary mb-2'>Login</h1>
+            <h1 className='text-[32px] font-bold text-primary mb-2'>Sign Up</h1>
           </div>
 
           {submitSuccess ? (
@@ -93,6 +97,24 @@ export default function SignInPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className='space-y-6'>
+              <div className='mb-4'>
+                <label htmlFor='name' className='text-[#262626] text-lg'>
+                  Name
+                </label>
+                <input
+                  type='text'
+                  id='name'
+                  name='name'
+                  placeholder='Enter your name'
+                  value={formData.name}
+                  onChange={handleChange}
+                  className={`bg-transparent text-primary w-full p-3 border placeholder:text-[##9B9B9B] mt-1.5 ${
+                    errors.name ? "border-red-500" : "border-slate-300"
+                  } rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  required
+                />
+              </div>
+
               <div className='mb-4'>
                 <label htmlFor='email' className='text-[#262626] text-lg'>
                   Email
@@ -180,13 +202,18 @@ export default function SignInPage() {
 
           <div className='text-center mt-6'>
             <p className='text-[#8A8A8A] text-lg'>
-              Don&apos;t have an account?{" "}
+              Already have an account?{"    "}
               <Link
-                href='/signup'
+                href='/signin'
                 className='text-[#0249E1] text-lg font-medium hover:underline'
               >
-                Sign Up Now
+                Sign In
               </Link>
+            </p>
+
+            <p className='text-[#8A8A8A] text-lg mt-4'>
+              By continuing you agree with our Terms of Service and confirm that
+              you have read our Privacy Policy
             </p>
           </div>
         </div>

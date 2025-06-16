@@ -2,8 +2,6 @@
 
 import type React from "react";
 import { useState, type FormEvent } from "react";
-import Image from "next/image";
-import Link from "next/link";
 
 export default function CreatePasswordPage() {
   const [formData, setFormData] = useState({
@@ -72,28 +70,15 @@ export default function CreatePasswordPage() {
   };
 
   return (
-    <main className='w-full min-h-screen flex flex-col md:flex-row items-center justify-center p-4 md:p-8 bg-gray-50'>
-      <div className='container mx-auto flex flex-col md:flex-row items-center'>
-        {/* Logo Section */}
-        <div className='hidden w-full md:w-1/2 md:flex items-center justify-center p-8'>
-          <Link href='/' className='max-w-xs'>
-            <Image
-              src='/logo.svg' // Replace with your logo path
-              alt='DesignDoc Logo'
-              width={200}
-              height={100}
-              className='mb-2'
-            />
-          </Link>
-        </div>
-
+    <main className='w-full min-h-screen bg-[#E9E9E9] flex flex-col md:flex-row items-center justify-center p-4 md:p-8'>
+      <div className='container mx-auto flex flex-col md:flex-row items-center justify-center'>
         {/* Form Section */}
-        <div className='w-full md:w-1/2 max-w-md'>
+        <div className='bg-white rounded-lg shadow-lg p-6 w-full md:w-1/2 max-w-xl'>
           <div className='text-center mb-6'>
             <h1 className='text-[32px] font-bold text-primary mb-2'>
-              Create Password
+              Reset Password
             </h1>
-            <p className='text-primary text-lg'>
+            <p className='text-[#6E6E6E] text-lg'>
               Create your new password for your account
             </p>
           </div>
@@ -102,7 +87,7 @@ export default function CreatePasswordPage() {
             <div>
               <label
                 htmlFor='newPassword'
-                className='block text-primary text-lg font-medium mb-1'
+                className='block text-[#262626] text-lg mb-1'
               >
                 New Password
               </label>
@@ -113,7 +98,7 @@ export default function CreatePasswordPage() {
                 placeholder='Enter your password'
                 value={formData.newPassword}
                 onChange={handleChange}
-                className={`w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.newPassword ? "border-red-500" : ""
                 }`}
               />
@@ -127,7 +112,7 @@ export default function CreatePasswordPage() {
             <div>
               <label
                 htmlFor='confirmPassword'
-                className='block text-primary text-lg font-medium mb-1'
+                className='block text-[#262626] text-lg mb-1'
               >
                 Confirm Password
               </label>
@@ -138,7 +123,7 @@ export default function CreatePasswordPage() {
                 placeholder='Enter your password'
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={`w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.confirmPassword ? "border-red-500" : ""
                 }`}
               />
@@ -156,13 +141,13 @@ export default function CreatePasswordPage() {
             <button
               type='submit'
               disabled={isSubmitting}
-              className='w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-md transition duration-200 ease-in-out'
+              className='w-full bg-[#0249E1] hover:bg-[#0249E1] text-white font-medium py-3 px-4 rounded-full transition duration-200 ease-in-out'
             >
-              {isSubmitting ? "Processing..." : "Continue"}
+              {isSubmitting ? "Processing..." : "Reset Password"}
             </button>
           </form>
 
-          <div className='text-center mt-6'>
+          {/* <div className='text-center mt-6'>
             <p className='text-gray-600'>
               Back to{" "}
               <Link
@@ -172,7 +157,7 @@ export default function CreatePasswordPage() {
                 Sign In
               </Link>
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
     </main>

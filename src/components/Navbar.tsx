@@ -62,10 +62,10 @@ export default function Navbar() {
           </Link>
 
           <div>
-            <button className='bg-[#FFFFFF] text-gray-700 font-semibold border-gray-300 hover:bg-gray-50 flex items-center rounded-4xl px-5 py-2.5'>
+            <Link href='/pricing' className='bg-[#FFFFFF] text-gray-700 font-semibold border-gray-300 hover:bg-gray-50 flex items-center rounded-4xl px-5 py-2.5'>
               Upgrade Your Plan
               <ArrowUpRight className='w-4 h-4 ml-2' />
-            </button>
+            </Link>
 
             {/*  */}
           </div>
