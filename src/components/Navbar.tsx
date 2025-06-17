@@ -13,12 +13,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [user] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -45,6 +47,8 @@ export default function Navbar() {
     console.log(`${action} clicked`);
     setIsDropdownOpen(false);
     // Handle different actions here
+
+    router.push("/signin");
   };
 
   return (
@@ -117,13 +121,13 @@ export default function Navbar() {
                     {/* Menu Items */}
                     <div className='py-2 space-y-1.5'>
                       {/* Settings - Highlighted */}
-                      <button
+                      {/* <button
                         onClick={() => handleMenuItemClick("Settings")}
                         className='w-full flex items-center space-x-3 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors'
                       >
                         <Settings className='w-4 h-4' />
                         <span className='font-medium'>Settings</span>
-                      </button>
+                      </button> */}
 
                       {/* Payment Details */}
                       <button
@@ -135,13 +139,14 @@ export default function Navbar() {
                       </button>
 
                       {/* Invoice Details */}
-                      <button
-                        onClick={() => handleMenuItemClick("Invoice Details")}
+                      <Link
+                        href='/invoice-details'
+                        // onClick={() => handleMenuItemClick("Invoice Details")}
                         className='w-full flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors'
                       >
                         <FileText className='w-4 h-4' />
                         <span>Invoice Details</span>
-                      </button>
+                      </Link>
 
                       {/* Log Out */}
                       <button
