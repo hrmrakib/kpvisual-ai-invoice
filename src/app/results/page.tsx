@@ -3,17 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import {
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  FileText,
-  Download,
-  Upload,
-  ArrowLeft,
-  Loader2,
-} from "lucide-react";
+import { FileText, Download, Loader2 } from "lucide-react";
 
 interface InvoiceAnalysisResult {
   status: "verified" | "fake" | "suspicious";
@@ -30,7 +20,7 @@ export default function ResultsPage() {
   const [analysisResult, setAnalysisResult] =
     useState<InvoiceAnalysisResult | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
+  // const [dragActive, setDragActive] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadingFile, setUploadingFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -118,25 +108,25 @@ export default function ResultsPage() {
     };
   };
 
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
+  // const handleDrag = (e: React.DragEvent) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   if (e.type === "dragenter" || e.type === "dragover") {
+  //     setDragActive(true);
+  //   } else if (e.type === "dragleave") {
+  //     setDragActive(false);
+  //   }
+  // };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
+  // const handleDrop = (e: React.DragEvent) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   setDragActive(false);
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0]);
-    }
-  };
+  //   if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+  //     handleFile(e.dataTransfer.files[0]);
+  //   }
+  // };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -205,9 +195,9 @@ export default function ResultsPage() {
     }
   };
 
-  const handleUploadAnotherClick = () => {
-    fileInputRef.current?.click();
-  };
+  // const handleUploadAnotherClick = () => {
+  //   fileInputRef.current?.click();
+  // };
 
   const handleDownloadReport = async () => {
     if (!analysisResult) return;
@@ -303,18 +293,18 @@ Report ID: ${Date.now()}
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "verified":
-        return "text-green-600";
-      case "fake":
-        return "text-red-600";
-      case "suspicious":
-        return "text-yellow-600";
-      default:
-        return "text-gray-600";
-    }
-  };
+  // const getStatusColor = (status: string) => {
+  //   switch (status) {
+  //     case "verified":
+  //       return "text-green-600";
+  //     case "fake":
+  //       return "text-red-600";
+  //     case "suspicious":
+  //       return "text-yellow-600";
+  //     default:
+  //       return "text-gray-600";
+  //   }
+  // };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
@@ -329,18 +319,18 @@ Report ID: ${Date.now()}
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "verified":
-        return <CheckCircle className='w-8 h-8 text-green-600' />;
-      case "fake":
-        return <XCircle className='w-8 h-8 text-red-600' />;
-      case "suspicious":
-        return <AlertTriangle className='w-8 h-8 text-yellow-600' />;
-      default:
-        return <CheckCircle className='w-8 h-8 text-blue-600' />;
-    }
-  };
+  // const getStatusIcon = (status: string) => {
+  //   switch (status) {
+  //     case "verified":
+  //       return <CheckCircle className='w-8 h-8 text-green-600' />;
+  //     case "fake":
+  //       return <XCircle className='w-8 h-8 text-red-600' />;
+  //     case "suspicious":
+  //       return <AlertTriangle className='w-8 h-8 text-yellow-600' />;
+  //     default:
+  //       return <CheckCircle className='w-8 h-8 text-blue-600' />;
+  //   }
+  // };
 
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 80) return "bg-green-500";
@@ -443,13 +433,13 @@ Report ID: ${Date.now()}
                   </span>
                   <div>
                     <span
-                    className={`px-4 py-3 rounded-full text-sm font-medium border ${getStatusBadgeColor(
-                      analysisResult.status
-                    )}`}
-                  >
-                    {analysisResult.status.charAt(0).toUpperCase() +
-                      analysisResult.status.slice(1)}
-                  </span>
+                      className={`px-4 py-3 rounded-full text-sm font-medium border ${getStatusBadgeColor(
+                        analysisResult.status
+                      )}`}
+                    >
+                      {analysisResult.status.charAt(0).toUpperCase() +
+                        analysisResult.status.slice(1)}
+                    </span>
                   </div>
                 </div>
               </div>

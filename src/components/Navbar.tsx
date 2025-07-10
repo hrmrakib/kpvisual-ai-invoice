@@ -2,14 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import {
-  Menu,
-  ArrowUpRight,
-  CreditCard,
-  FileText,
-  LogOut,
-  Settings,
-} from "lucide-react";
+import { Menu, ArrowUpRight, CreditCard, FileText, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Image from "next/image";
