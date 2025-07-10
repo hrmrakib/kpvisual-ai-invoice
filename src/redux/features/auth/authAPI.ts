@@ -10,12 +10,7 @@ const AuthenticationAPI = baseAPI.injectEndpoints({
       }),
     }),
     signup: builder.mutation({
-      query: (data: {
-        fullName: string;
-        email: string;
-        password: string;
-        profile_pic: File;
-      }) => ({
+      query: (data) => ({
         url: "/user/create-user",
         method: "POST",
         body: data,
