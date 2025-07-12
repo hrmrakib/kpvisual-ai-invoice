@@ -4,14 +4,15 @@ const AuthenticationAPI = baseAPI.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (body) => ({
-        url: "/auth/login/",
+        url: "api/v1/account/login/",
         method: "POST",
         body,
       }),
     }),
+
     signup: builder.mutation({
       query: (data) => ({
-        url: "/user/create-user",
+        url: "api/v1/account/signup/",
         method: "POST",
         body: data,
       }),
@@ -19,7 +20,7 @@ const AuthenticationAPI = baseAPI.injectEndpoints({
 
     verifyOtp: builder.mutation({
       query: (body) => ({
-        url: "/auth/verify-email",
+        url: "api/v1/account/verify-email/",
         method: "POST",
         body,
       }),

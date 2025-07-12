@@ -5,6 +5,8 @@ import type React from "react";
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useVerifyOtpMutation } from "@/redux/features/auth/authAPI";
+import { useRouter } from "next/navigation";
 // import { useRouter } from "next/navigation";
 
 export default function VerifyOTP() {
@@ -14,6 +16,8 @@ export default function VerifyOTP() {
   const [countdown, setCountdown] = useState(0);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   // const [email, setEmail] = useState("");
+  const [verifyOtp] = useVerifyOtpMutation();
+  const router = useRouter();
 
   // Handle input change and auto-focus to next input
   const handleChange = (index: number, value: string) => {
@@ -72,44 +76,44 @@ export default function VerifyOTP() {
       return;
     }
 
-    // try {
-    //   const res = await verifyOtp({
-    //     email,
-    //     otp: otpValue,
-    //   }).unwrap();
+    try {
+      const res = await verifyOtp({
+        otp: otpValue,
+      }).unwrap();
 
-    //   if (res.status === "success") {
-    //     localStorage.setItem("access_token", res.access_token);
-    //     toast.success(res.message);
-    //     router.push("/");
-    //   } else {
-    //     toast.error(res.message);
-    //   }
-    // } catch (error) {
-    //   toast.warning("The OTP you entered is incorrect or has expired");
-    // } finally {
-    //   setIsSubmitting(false);
-    // }
+      if (res?.success) {
+        toast.success(res.message);
+        router.push("/login");
+      } else {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      toast.warning("The OTP you entered is incorrect or has expired");
+      console.log(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Handle resend OTP
-  // const handleResend = async () => {
-  //   setResendDisabled(true);
-  //   setCountdown(30); // 30 seconds cooldown
+  const handleResend = async () => {
+    setResendDisabled(true);
+    setCountdown(30); // 30 seconds cooldown
 
-  //   try {
-  //     // Simulate API call to resend OTP
-  //     await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      // Simulate API call to resend OTP
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  //     toast.success("OTP Resent");
+      toast.success("OTP Resent");
 
-  //     // Clear current OTP fields
-  //     setOtp(["", "", "", ""]);
-  //     inputRefs.current[0]?.focus();
-  //   } catch (error) {
-  //     toast.error("Please try again later");
-  //   }
-  // };
+      // Clear current OTP fields
+      setOtp(["", "", "", "", "", ""]);
+      inputRefs.current[0]?.focus();
+    } catch (error) {
+      toast.error("Please try again later");
+      console.log(error);
+    }
+  };
 
   // Countdown timer for resend button
   useEffect(() => {
@@ -176,9 +180,9 @@ export default function VerifyOTP() {
                 Didn&apos;t receive the OTP?{" "}
                 <button
                   type='button'
-                  // onClick={handleResend}
+                  onClick={handleResend}
                   disabled={resendDisabled}
-                  className='text-[#0249E1] hover:text-[#0249E1] font-medium disabled:text-gray-400'
+                  className='text-[#0249E1] hover:text-[#0249E1] font-medium disabled:text-gray-400 cursor-pointer'
                 >
                   {resendDisabled ? `Resend (${countdown}s)` : "Resend"}
                 </button>

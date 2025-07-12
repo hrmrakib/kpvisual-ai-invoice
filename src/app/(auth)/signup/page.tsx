@@ -7,6 +7,8 @@ import Link from "next/link";
 import { Camera, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import { useSignupMutation } from "@/redux/features/auth/authAPI";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -23,6 +25,7 @@ export default function SignUpPage() {
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [signup] = useSignupMutation();
+  const router = useRouter();
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -93,6 +96,11 @@ export default function SignUpPage() {
       }
 
       const response = await signup(inFormData).unwrap();
+
+      if (response?.success) {
+        toast.success(response.message);
+        router.push("/verify-otp");
+      }
 
       console.log(response);
     } catch (error) {
