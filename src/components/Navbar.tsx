@@ -41,7 +41,7 @@ export default function Navbar() {
     setIsDropdownOpen(false);
     // Handle different actions here
 
-    router.push("/signin");
+    router.push("/login");
   };
 
   return (

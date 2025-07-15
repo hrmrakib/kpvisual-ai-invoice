@@ -5,6 +5,9 @@ import type React from "react";
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
+import { useLoginMutation } from "@/redux/features/auth/authAPI";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
   const [formData, setFormData] = useState({
@@ -16,6 +19,8 @@ export default function SignInPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess] = useState(false);
+  const [login] = useLoginMutation();
+  const router = useRouter();
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -59,7 +64,20 @@ export default function SignInPage() {
     setIsSubmitting(true);
 
     try {
-      // setSubmitSuccess(true);
+      const response = await login({
+        email: formData.email,
+        password: formData.password,
+      }).unwrap();
+
+      if (response?.success) {
+        localStorage.setItem("access_token", response?.access_token);
+        localStorage.setItem("refresh_token", response?.refresh_token);
+        localStorage.setItem("kpvisual_ai_invoice", response?.user);
+
+        toast.success(response.message);
+        router.push("/");
+      }
+      console.log(response);
       // In a real app, you would redirect to dashboard or home page after successful login
     } catch (error) {
       console.error("Error submitting form:", error);
