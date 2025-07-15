@@ -5,17 +5,7 @@ import type React from "react";
 import { useState, useRef } from "react";
 import { Upload, FileText, Loader2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-interface InvoiceAnalysisResult {
-  status: "verified" | "fake" | "suspicious";
-  confidence: number;
-  invoiceNumber: string;
-  date: string;
-  amount: string;
-  vendor: string;
-  fileName: string;
-  fileSize: number;
-}
+import { useUploadFileMutation } from "@/redux/features/fileUploadAPI";
 
 export default function HomePage() {
   const [dragActive, setDragActive] = useState(false);
@@ -23,6 +13,7 @@ export default function HomePage() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const [uploadFile] = useUploadFileMutation();
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -73,96 +64,20 @@ export default function HomePage() {
     verifyInvoice(selectedFile);
   };
 
-  const generateMockAnalysisResult = (file: File): InvoiceAnalysisResult => {
-    // Generate random but realistic analysis results
-    const statuses: ("verified" | "fake" | "suspicious")[] = [
-      "verified",
-      "fake",
-      "suspicious",
-    ];
-    const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-
-    // Adjust confidence based on status
-    let confidence: number;
-    switch (randomStatus) {
-      case "verified":
-        confidence = Math.floor(Math.random() * 15) + 85; // 85-100%
-        break;
-      case "fake":
-        confidence = Math.floor(Math.random() * 20) + 15; // 15-35%
-        break;
-      case "suspicious":
-        confidence = Math.floor(Math.random() * 30) + 40; // 40-70%
-        break;
-    }
-
-    const mockInvoiceNumbers = [
-      "INV-94218",
-      "INV-00123",
-      "INV-45789",
-      "INV-12345",
-      "INV-67890",
-    ];
-    const mockVendors = [
-      "ABC Supplies",
-      "Tech Solutions Inc",
-      "Global Services Ltd",
-      "Premium Products Co",
-      "Digital Systems",
-    ];
-    const mockAmounts = [
-      "$1,240.00",
-      "$850.50",
-      "$2,150.75",
-      "$495.25",
-      "$3,200.00",
-    ];
-
-    // Generate date within last 6 months
-    const today = new Date();
-    const sixMonthsAgo = new Date(
-      today.getFullYear(),
-      today.getMonth() - 6,
-      today.getDate()
-    );
-    const randomDate = new Date(
-      sixMonthsAgo.getTime() +
-        Math.random() * (today.getTime() - sixMonthsAgo.getTime())
-    );
-
-    return {
-      status: randomStatus,
-      confidence,
-      invoiceNumber:
-        mockInvoiceNumbers[
-          Math.floor(Math.random() * mockInvoiceNumbers.length)
-        ],
-      date: randomDate.toISOString().split("T")[0],
-      amount: mockAmounts[Math.floor(Math.random() * mockAmounts.length)],
-      vendor: mockVendors[Math.floor(Math.random() * mockVendors.length)],
-      fileName: file.name,
-      fileSize: file.size,
-    };
-  };
-
   const verifyInvoice = async (file: File) => {
     setIsUploading(true);
 
     try {
-      // Simulate API call for invoice verification
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      const formData = new FormData();
+      formData.append("invoice", file);
 
-      // Generate mock analysis result
-      const analysisResult = generateMockAnalysisResult(file);
+      const res = await uploadFile(formData).unwrap();
 
-      // Store result in sessionStorage to pass to results page
-      sessionStorage.setItem(
-        "invoiceAnalysisResult",
-        JSON.stringify(analysisResult)
-      );
-
-      // Redirect to results page
-      router.push("/results");
+      if (res.success) {
+        router.push(`/results/${res.invoiceId}`);
+      }
+      console.log(res);
+      setIsUploading(false);
     } catch (error) {
       console.error("Verification failed:", error);
       alert("Verification failed. Please try again.");
@@ -178,6 +93,8 @@ export default function HomePage() {
       fileInputRef.current.value = "";
     }
   };
+
+  console.log(file);
 
   return (
     <div className='min-h-[81.5vh] bg-[#E9E9E9]'>
