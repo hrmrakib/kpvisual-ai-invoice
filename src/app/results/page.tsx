@@ -1,114 +1,51 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import type React from "react";
 
 import { useState, useEffect, useRef } from "react";
 import { FileText, Loader2 } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { setInvoiceResult } from "@/redux/features/invoiceResultSlice";
+import { useUploadFileMutation } from "@/redux/features/fileUploadAPI";
+import { useRouter } from "next/navigation";
 
 interface InvoiceAnalysisResult {
-  status: "verified" | "fake" | "suspicious";
-  confidence: number;
-  invoiceNumber: string;
-  date: string;
-  amount: string;
-  vendor: string;
-  fileName: string;
-  fileSize: number;
+  success: boolean;
+  invoice_id: string;
+  status: "verified" | "fake" | "altered" | string;
+  message: string;
+  invoice_image: string | null;
+  ela_image: string | null;
+  user: string;
+  checked_at: string; // ISO timestamp
+}
+
+interface InvoiceResultState {
+  invoiceResult: InvoiceAnalysisResult | null;
+}
+
+interface RootState {
+  invoiceResult: InvoiceResultState;
 }
 
 export default function ResultsPage() {
-  const [analysisResult, setAnalysisResult] =
-    useState<InvoiceAnalysisResult | null>(null);
+  const invoiceResult = useSelector((state: RootState) => state.invoiceResult);
+  useState<InvoiceAnalysisResult | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadingFile, setUploadingFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const [uploadFile] = useUploadFileMutation();
 
   useEffect(() => {
     // Get analysis result from sessionStorage
     const storedResult = sessionStorage.getItem("invoiceAnalysisResult");
-    if (storedResult) {
-      setAnalysisResult(JSON.parse(storedResult));
-    } else {
-      // If no result found, redirect back to home
-      window.location.href = "/";
+    if (invoiceResult !== null && storedResult !== null) {
+      dispatch(setInvoiceResult(JSON.parse(storedResult)));
     }
   }, []);
-
-  const generateMockAnalysisResult = (file: File): InvoiceAnalysisResult => {
-    // Generate random but realistic analysis results
-    const statuses: ("verified" | "fake" | "suspicious")[] = [
-      "verified",
-      "fake",
-      "suspicious",
-    ];
-    const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-
-    // Adjust confidence based on status
-    let confidence: number;
-    switch (randomStatus) {
-      case "verified":
-        confidence = Math.floor(Math.random() * 15) + 85; // 85-100%
-        break;
-      case "fake":
-        confidence = Math.floor(Math.random() * 20) + 15; // 15-35%
-        break;
-      case "suspicious":
-        confidence = Math.floor(Math.random() * 30) + 40; // 40-70%
-        break;
-    }
-
-    const mockInvoiceNumbers = [
-      "INV-94218",
-      "INV-00123",
-      "INV-45789",
-      "INV-12345",
-      "INV-67890",
-    ];
-
-    const mockVendors = [
-      "ABC Supplies",
-      "Tech Solutions Inc",
-      "Global Services Ltd",
-      "Premium Products Co",
-      "Digital Systems",
-    ];
-
-    const mockAmounts = [
-      "$1,240.00",
-      "$850.50",
-      "$2,150.75",
-      "$495.25",
-      "$3,200.00",
-    ];
-
-    // Generate date within last 6 months
-    const today = new Date();
-
-    const sixMonthsAgo = new Date(
-      today.getFullYear(),
-      today.getMonth() - 6,
-      today.getDate()
-    );
-
-    const randomDate = new Date(
-      sixMonthsAgo.getTime() +
-        Math.random() * (today.getTime() - sixMonthsAgo.getTime())
-    );
-
-    return {
-      status: randomStatus,
-      confidence,
-      invoiceNumber:
-        mockInvoiceNumbers[
-          Math.floor(Math.random() * mockInvoiceNumbers.length)
-        ],
-      date: randomDate.toISOString().split("T")[0],
-      amount: mockAmounts[Math.floor(Math.random() * mockAmounts.length)],
-      vendor: mockVendors[Math.floor(Math.random() * mockVendors.length)],
-      fileName: file.name,
-      fileSize: file.size,
-    };
-  };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -143,37 +80,27 @@ export default function ResultsPage() {
     setIsUploading(true);
 
     try {
-      // Simulate API call for invoice verification
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      const formData = new FormData();
 
-      // Generate mock analysis result
-      const newAnalysisResult = generateMockAnalysisResult(file);
+      formData.append("invoice", file);
 
-      // Update current analysis result
-      setAnalysisResult(newAnalysisResult);
+      const res = await uploadFile(formData).unwrap();
 
-      // Store result in sessionStorage
-      sessionStorage.setItem(
-        "invoiceAnalysisResult",
-        JSON.stringify(newAnalysisResult)
-      );
+      console.log(res);
 
-      // Reset upload states
-      setIsUploading(false);
-      setUploadingFile(null);
-
-      // Clear file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+      if (res.success) {
+        dispatch(setInvoiceResult(res));
+        sessionStorage.setItem("invoiceAnalysisResult", JSON.stringify(res));
+        router.push(`/results`);
+        // router.push(`/results/${res.invoiceId}`);
       }
-
-      // Scroll to top to show new results
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      console.log(res);
+      setIsUploading(false);
     } catch (error) {
       console.error("Verification failed:", error);
       alert("Verification failed. Please try again.");
       setIsUploading(false);
-      setUploadingFile(null);
+      // setFile(null);
     }
   };
 
@@ -181,29 +108,18 @@ export default function ResultsPage() {
   //   fileInputRef.current?.click();
   // };
 
-  const getStatusBadgeColor = (status: string) => {
+  const getStatusBadgeColor = (status: string | null | undefined) => {
     switch (status) {
-      case "verified":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "fake":
-        return "bg-red-100 text-red-800 border-red-200";
+      case "authentic":
+        return "bg-green-600 text-white  border-green-200";
+      case "altered":
+        return "bg-red-600 text-white border-red-200";
       case "suspicious":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
-
-  if (!analysisResult) {
-    return (
-      <div className='min-h-screen bg-gray-50 flex items-center justify-center'>
-        <div className='text-center'>
-          <div className='w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
-          <p className='text-gray-600'>Loading analysis results...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className='min-h-[84vh] bg-[#E9E9E9] flex flex-col justify-center items-center'>
@@ -290,12 +206,11 @@ export default function ResultsPage() {
                   </span>
                   <div>
                     <span
-                      className={`px-4 py-3 rounded-full text-sm font-medium border ${getStatusBadgeColor(
-                        analysisResult.status
+                      className={`px-6 py-3 rounded-full text-sm font-medium border capitalize ${getStatusBadgeColor(
+                        invoiceResult?.invoiceResult?.status
                       )}`}
                     >
-                      {analysisResult.status.charAt(0).toUpperCase() +
-                        analysisResult.status.slice(1)}
+                      {invoiceResult?.invoiceResult?.status}
                     </span>
                   </div>
                 </div>
@@ -317,24 +232,6 @@ export default function ResultsPage() {
                   />
                   Upload Another Invoice
                 </button>
-
-                {/* <button
-                  onClick={handleDownloadReport}
-                  disabled={isDownloading}
-                  className='bg-white hover:bg-gray-50 text-gray-900 font-medium py-3 px-6 rounded-lg border-2 border-gray-300 hover:border-gray-400 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center'
-                >
-                  {isDownloading ? (
-                    <>
-                      <div className='w-4 h-4 mr-2 border-2 border-gray-400 border-t-transparent rounded-full animate-spin'></div>
-                      Downloading...
-                    </>
-                  ) : (
-                    <>
-                      <Download className='w-4 h-4 mr-2' />
-                      Download Report
-                    </>
-                  )}
-                </button> */}
               </div>
             </div>
           </div>

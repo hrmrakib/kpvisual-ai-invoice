@@ -6,6 +6,8 @@ import { useState, useRef } from "react";
 import { Upload, FileText, Loader2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useUploadFileMutation } from "@/redux/features/fileUploadAPI";
+import { useDispatch } from "react-redux";
+import { setInvoiceResult } from "@/redux/features/invoiceResultSlice";
 
 export default function HomePage() {
   const [dragActive, setDragActive] = useState(false);
@@ -14,6 +16,7 @@ export default function HomePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [uploadFile] = useUploadFileMutation();
+  const dispatch = useDispatch();
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -69,12 +72,16 @@ export default function HomePage() {
 
     try {
       const formData = new FormData();
+
       formData.append("invoice", file);
 
       const res = await uploadFile(formData).unwrap();
 
       if (res.success) {
-        router.push(`/results/${res.invoiceId}`);
+        dispatch(setInvoiceResult(res));
+        sessionStorage.setItem("invoiceAnalysisResult", JSON.stringify(res));
+        router.push(`/results`);
+        // router.push(`/results/${res.invoiceId}`);
       }
       console.log(res);
       setIsUploading(false);

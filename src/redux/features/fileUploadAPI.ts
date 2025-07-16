@@ -4,7 +4,7 @@ const fileUploadAPI = baseAPI.injectEndpoints({
   endpoints: (builder) => ({
     uploadFile: builder.mutation({
       query: (data) => ({
-        url: "api/v1/ai_invoice/action",
+        url: "api/v1/ai_invoice/api/",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
