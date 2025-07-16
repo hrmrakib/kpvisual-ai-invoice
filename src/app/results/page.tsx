@@ -13,12 +13,12 @@ import { useRouter } from "next/navigation";
 interface InvoiceAnalysisResult {
   success: boolean;
   invoice_id: string;
-  status: "verified" | "fake" | "altered" | string;
+  status: "authentic" | "altered" | string;
   message: string;
   invoice_image: string | null;
   ela_image: string | null;
   user: string;
-  checked_at: string; // ISO timestamp
+  checked_at: string;
 }
 
 interface InvoiceResultState {
