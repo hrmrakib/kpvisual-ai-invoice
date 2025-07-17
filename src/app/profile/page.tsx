@@ -6,13 +6,7 @@ import { useState, useRef } from "react";
 import { Eye, EyeOff, Camera, ArrowLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-
-interface UserProfile {
-  name: string;
-  email: string;
-  password: string;
-  profileImage: string;
-}
+import { useGetProfileQuery } from "@/redux/features/profile/profileAPI";
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
@@ -23,19 +17,16 @@ export default function ProfilePage() {
     confirm: false,
   });
 
-  const [profile, setProfile] = useState<UserProfile>({
-    name: "applepeo abrharim",
-    email: "adhugahdg@gmail.com",
-    password: "223**********8",
-    profileImage: "/user.jpg",
+  const [editForm, setEditForm] = useState({
+    name: "",
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
-  const [editForm, setEditForm] = useState({
-    name: "applepeo abrharim",
-    oldPassword: "223**********8",
-    newPassword: "223**********8",
-    confirmPassword: "223**********8",
-  });
+  const { data: profile } = useGetProfileQuery({});
+
+  console.log(profile);
 
   const [imageUpload, setImageUpload] = useState({
     file: null as File | null,
@@ -133,20 +124,20 @@ export default function ProfilePage() {
 
     try {
       // Upload image if there's a new one
-      let newImageUrl = profile.profileImage;
-      if (imageUpload.file) {
-        newImageUrl = await uploadImage(imageUpload.file);
-      }
+      // let newImageUrl = profile.profileImage;
+      // if (imageUpload.file) {
+      //   newImageUrl = await uploadImage(imageUpload.file);
+      // }
 
       // Simulate API call for profile update
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Update profile with new data
-      setProfile((prev) => ({
-        ...prev,
-        name: editForm.name,
-        profileImage: newImageUrl,
-      }));
+      // setProfile((prev) => ({
+      //   ...prev,
+      //   name: editForm.name,
+      //   profileImage: newImageUrl,
+      // }));
 
       // Reset image upload state
       setImageUpload({
@@ -187,10 +178,10 @@ export default function ProfilePage() {
   };
 
   const getCurrentProfileImage = () => {
-    if (imageUpload.preview) {
-      return imageUpload.preview;
+    if (imageUpload?.preview) {
+      return imageUpload?.preview;
     }
-    return profile.profileImage;
+    return profile?.profile_pic;
   };
 
   return (
@@ -214,7 +205,9 @@ export default function ProfilePage() {
             <div className='relative inline-block mb-4'>
               <div className='w-24 h-24 rounded-full overflow-hidden mx-auto border-4 border-gray-200'>
                 <Image
-                  src={getCurrentProfileImage() || "/placeholder.svg"}
+                  src={`${
+                    process.env.NEXT_PUBLIC_IMAGE_URL
+                  }${getCurrentProfileImage()}`}
                   alt='Profile'
                   className='w-full h-full object-cover'
                   width={96}
@@ -260,9 +253,9 @@ export default function ProfilePage() {
             </div>
 
             <h1 className='text-xl font-semibold text-gray-900 capitalize'>
-              {profile.name.replace(/\b\w/g, (l) => l.toUpperCase())}
+              {profile?.full_name}
             </h1>
-            <p className='text-gray-500'>{profile.email}</p>
+            <p className='text-gray-500'>{profile?.email}</p>
 
             {/* Image upload status */}
             {isEditing && imageUpload.file && (
@@ -305,7 +298,7 @@ export default function ProfilePage() {
                   </label>
                   <input
                     type='text'
-                    value={profile.name}
+                    value={profile?.full_name}
                     readOnly
                     className='w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed'
                   />
@@ -317,7 +310,7 @@ export default function ProfilePage() {
                   </label>
                   <input
                     type='email'
-                    value={profile.email}
+                    value={profile?.email}
                     readOnly
                     className='w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed'
                   />
@@ -329,21 +322,11 @@ export default function ProfilePage() {
                   </label>
                   <div className='relative'>
                     <input
-                      type={showPasswords.current ? "text" : "password"}
-                      value={profile.password}
+                      type={"text"}
+                      value={profile?.mobile_no}
                       readOnly
                       className='w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed'
                     />
-                    <button
-                      onClick={() => togglePasswordVisibility("current")}
-                      className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600'
-                    >
-                      {showPasswords.current ? (
-                        <EyeOff className='w-5 h-5' />
-                      ) : (
-                        <Eye className='w-5 h-5' />
-                      )}
-                    </button>
                   </div>
                 </div>
 

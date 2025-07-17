@@ -21,7 +21,7 @@ export default function PricingPage() {
     {
       name: "Basic Plan",
       monthlyPrice: 2.0,
-      yearlyPrice: 1.4, // 30% discount
+      yearlyPrice: 1.4,
       uploads: "100",
       description:
         "Let top creative talent come to you by posting your job listing on #1 Design Jobs Board.",
@@ -34,7 +34,7 @@ export default function PricingPage() {
     {
       name: "Pro Plan",
       monthlyPrice: 8.99,
-      yearlyPrice: 6.29, // 30% discount
+      yearlyPrice: 6.29,
       uploads: "500",
       description:
         "Easily search and recruit available designers for hire based on your ideal qualifications.",
@@ -49,7 +49,7 @@ export default function PricingPage() {
     {
       name: "Enterprise Plan",
       monthlyPrice: 13.99,
-      yearlyPrice: 9.79, // 30% discount
+      yearlyPrice: 9.79,
       uploads: "Unlimited",
       description:
         "Easily search and recruit available designers for hire based on your ideal qualifications.",
@@ -178,13 +178,13 @@ export default function PricingPage() {
                 {/* CTA Button */}
                 <button
                   onClick={() => handlePlanSelect(plan.name)}
-                  className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors duration-200 ${
+                  className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors duration-200 cursor-pointer ${
                     plan.isPopular
                       ? "bg-blue-600 hover:bg-blue-700 text-white"
                       : "border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
                   }`}
                 >
-                  Start hiring now
+                  Subscribe Now
                 </button>
               </div>
 

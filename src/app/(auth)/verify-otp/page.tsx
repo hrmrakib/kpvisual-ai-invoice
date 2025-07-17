@@ -5,7 +5,10 @@ import type React from "react";
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { useVerifyOtpMutation } from "@/redux/features/auth/authAPI";
+import {
+  useResendOtpMutation,
+  useVerifyOtpMutation,
+} from "@/redux/features/auth/authAPI";
 import { useRouter } from "next/navigation";
 // import { useRouter } from "next/navigation";
 
@@ -17,6 +20,7 @@ export default function VerifyOTP() {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   // const [email, setEmail] = useState("");
   const [verifyOtp] = useVerifyOtpMutation();
+  const [resendOtp] = useResendOtpMutation();
   const router = useRouter();
 
   // Handle input change and auto-focus to next input
@@ -101,10 +105,15 @@ export default function VerifyOTP() {
     setCountdown(30); // 30 seconds cooldown
 
     try {
-      // Simulate API call to resend OTP
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const res = await resendOtp({}).unwrap();
 
-      toast.success("OTP Resent");
+      console.log(res);
+
+      if (res?.success) {
+        toast.success(res.message);
+      } else {
+        toast.error(res.message);
+      }
 
       // Clear current OTP fields
       setOtp(["", "", "", "", "", ""]);
@@ -124,15 +133,6 @@ export default function VerifyOTP() {
       setResendDisabled(false);
     }
   }, [countdown, resendDisabled]);
-
-  // useEffect(() => {
-  //   inputRefs.current[0]?.focus();
-
-  //   const storedEmail = localStorage.getItem("email");
-  //   if (storedEmail) {
-  //     setEmail(storedEmail);
-  //   }
-  // }, []);
 
   return (
     <div className='w-full min-h-screen bg-[#E9E9E9] flex flex-col items-center justify-center p-4 md:p-8'>
@@ -188,15 +188,6 @@ export default function VerifyOTP() {
                 </button>
               </p>
             </div>
-
-            {/* <div className='text-center'> 
-              <Link
-                href='/signin'
-                className='text-primary hover:text-primary text-base font-medium'
-              >
-                Back to Sign In
-              </Link>
-            </div> */}
           </form>
         </div>
       </div>

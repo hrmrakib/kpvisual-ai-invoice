@@ -36,7 +36,7 @@ const AuthenticationAPI = baseAPI.injectEndpoints({
 
     resendOtp: builder.mutation({
       query: (body) => ({
-        url: "/auth/resend-otp",
+        url: "api/v1/account/resend-otp/",
         method: "POST",
         body,
       }),
@@ -44,7 +44,15 @@ const AuthenticationAPI = baseAPI.injectEndpoints({
 
     forgotPassword: builder.mutation({
       query: (body) => ({
-        url: "/auth/forgot-password",
+        url: "api/v1/account/forget-password/",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    resetPassword: builder.mutation({
+      query: (body) => ({
+        url: "api/v1/account/reset-password/",
         method: "POST",
         body,
       }),
@@ -58,4 +66,6 @@ export const {
   useVerifyOtpMutation,
   useSendOtpMutation,
   useResendOtpMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
 } = AuthenticationAPI;

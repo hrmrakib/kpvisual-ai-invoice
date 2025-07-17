@@ -1,5 +1,6 @@
 "use client";
 
+import { useResetPasswordMutation } from "@/redux/features/auth/authAPI";
 import type React from "react";
 import { useState, type FormEvent } from "react";
 
@@ -10,6 +11,7 @@ export default function CreatePasswordPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resetPassword] = useResetPasswordMutation();
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -57,8 +59,12 @@ export default function CreatePasswordPage() {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call to update password
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const res = await resetPassword({
+        new_password: formData?.newPassword,
+        confirm_password: formData?.confirmPassword,
+      }).unwrap();
+
+      console.log(res);
 
       // In a real app, redirect to dashboard or login page after success
     } catch (error) {
@@ -70,7 +76,7 @@ export default function CreatePasswordPage() {
   };
 
   return (
-    <main className='w-full min-h-screen bg-[#E9E9E9] flex flex-col md:flex-row items-center justify-center p-4 md:p-8'>
+    <main className='w-full min-h-svh bg-[#E9E9E9] flex flex-col md:flex-row items-center justify-center'>
       <div className='container mx-auto flex flex-col md:flex-row items-center justify-center'>
         {/* Form Section */}
         <div className='bg-white rounded-lg shadow-lg p-6 w-full md:w-1/2 max-w-xl'>
@@ -146,18 +152,6 @@ export default function CreatePasswordPage() {
               {isSubmitting ? "Processing..." : "Reset Password"}
             </button>
           </form>
-
-          {/* <div className='text-center mt-6'>
-            <p className='text-gray-600'>
-              Back to{" "}
-              <Link
-                href='/signin'
-                className='text-blue-600 font-medium hover:underline'
-              >
-                Sign In
-              </Link>
-            </p>
-          </div> */}
         </div>
       </div>
     </main>

@@ -1,14 +1,19 @@
 "use client";
 
+import { useForgotPasswordMutation } from "@/redux/features/auth/authAPI";
+import { useRouter } from "next/navigation";
 import type React from "react";
 
 import { useState, type FormEvent } from "react";
+import { toast } from "sonner";
 
 export default function ForgetPassword() {
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess] = useState(false);
+  const [forgotPassword] = useForgotPasswordMutation();
+  const router = useRouter();
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -25,21 +30,20 @@ export default function ForgetPassword() {
     }
     setIsSubmitting(true);
 
-    // try {
-    //   const response = await sendOtp({ email }).unwrap();
+    try {
+      const response = await forgotPassword({ email }).unwrap();
 
-    //   if (response.status === "success") {
-    //     localStorage.setItem("email", email);
-    //     toast.success("OTP sent successfully!");
-    //     setSubmitSuccess(true);
-    //     router.push("/verify-otp");
-    //   }
-    // } catch (error) {
-    //   console.error("Error submitting form:", error);
-    //   setErrors({ submit: "Invalid credentials. Please try again." });
-    // } finally {
-    //   setIsSubmitting(false);
-    // }
+      if (response.status === "success") {
+        localStorage.setItem("email", email);
+        toast.success("OTP sent successfully!");
+        router.push("/verify-otp");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setErrors({ submit: "Invalid credentials. Please try again." });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -97,18 +101,6 @@ export default function ForgetPassword() {
               </button>
             </form>
           )}
-
-          {/* <div className='text-center mt-6'>
-            <p className='text-primary text-lg'>
-              Back to{" "}
-              <Link
-                href='/signin'
-                className='text-primary text-lg font-medium hover:underline'
-              >
-                Sign In
-              </Link>
-            </p>
-          </div> */}
         </div>
       </div>
     </main>
