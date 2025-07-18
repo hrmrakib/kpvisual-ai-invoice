@@ -98,7 +98,8 @@ export default function SignUpPage() {
       const response = await signup(inFormData).unwrap();
 
       if (response?.success) {
-        toast.success(response.message);
+        toast.success(response?.message);
+
         router.push("/verify-otp");
       }
 

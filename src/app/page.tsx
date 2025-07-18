@@ -1,13 +1,18 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 "use client";
 
 import type React from "react";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Upload, FileText, Loader2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useUploadFileMutation } from "@/redux/features/fileUploadAPI";
 import { useDispatch } from "react-redux";
 import { setInvoiceResult } from "@/redux/features/invoiceResultSlice";
+import { toast } from "sonner";
+import { useGetProfileQuery } from "@/redux/features/profile/profileAPI";
+import { setCurrentUser } from "@/redux/features/auth/userSlice";
 
 export default function HomePage() {
   const [dragActive, setDragActive] = useState(false);
@@ -17,6 +22,14 @@ export default function HomePage() {
   const router = useRouter();
   const [uploadFile] = useUploadFileMutation();
   const dispatch = useDispatch();
+
+  const { data: userProfile } = useGetProfileQuery({});
+
+  useEffect(() => {
+    if (userProfile) {
+      dispatch(setCurrentUser(userProfile));
+    }
+  }, [userProfile]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -81,13 +94,12 @@ export default function HomePage() {
         dispatch(setInvoiceResult(res));
         sessionStorage.setItem("invoiceAnalysisResult", JSON.stringify(res));
         router.push(`/results`);
-        // router.push(`/results/${res.invoiceId}`);
       }
-      console.log(res);
+      // console.log(res);
       setIsUploading(false);
     } catch (error) {
       console.error("Verification failed:", error);
-      alert("Verification failed. Please try again.");
+      toast.error("Upgrade your plan to verify invoices.");
       setIsUploading(false);
       setFile(null);
     }
@@ -100,8 +112,6 @@ export default function HomePage() {
       fileInputRef.current.value = "";
     }
   };
-
-  console.log(file);
 
   return (
     <div className='min-h-[81.5vh] bg-[#E9E9E9]'>

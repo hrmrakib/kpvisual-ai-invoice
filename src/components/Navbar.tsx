@@ -1,19 +1,25 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Menu, ArrowUpRight, CreditCard, FileText, LogOut } from "lucide-react";
+import { Menu, ArrowUpRight, FileText, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { setCurrentUser } from "@/redux/features/auth/userSlice";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [user] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const dispatch = useDispatch();
+
+  const currentUser = useSelector((state: any) => state?.currentUser?.user);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -36,11 +42,10 @@ export default function Navbar() {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleMenuItemClick = (action: string) => {
-    console.log(`${action} clicked`);
-    setIsDropdownOpen(false);
-    // Handle different actions here
-
+  const handleLogout = () => {
+    dispatch(setCurrentUser(null));
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
     router.push("/login");
   };
 
@@ -53,14 +58,11 @@ export default function Navbar() {
             <div className='w-[160] h-[100] rounded-lg flex items-center justify-center'>
               <Image src='/logo.png' alt='Logo' width={160} height={150} />
             </div>
-            {/* <span className='text-xl md:text-2xl font-bold text-gray-900'>
-              NexVia
-            </span> */}
           </Link>
 
           <div>
             <Link
-              href='/pricing'
+              href='/upgrade'
               className='bg-[#FFFFFF] text-gray-700 font-semibold border-gray-300 hover:bg-gray-50 flex items-center rounded-4xl px-5 py-2.5'
             >
               Upgrade Your Plan
@@ -70,15 +72,17 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className='hidden md:flex items-center space-x-4'>
-            {user ? (
+            {currentUser ? (
               <div className='relative' ref={dropdownRef}>
                 <div
                   onClick={handleProfileClick}
                   className='w-10 h-10 rounded-full cursor-pointer'
                 >
                   <Image
-                    src='/user.jpg'
-                    className='w-10 h-10 rounded-full object-cover'
+                    src={
+                      process.env.NEXT_PUBLIC_API_URL + currentUser?.profile_pic
+                    }
+                    className='w-10 h-10 rounded-full object-cover border-2 border-blue-500 shadow'
                     alt='Profile'
                     width={50}
                     height={50}
@@ -94,7 +98,10 @@ export default function Navbar() {
                         className='flex items-center space-x-3'
                       >
                         <Image
-                          src='/user.jpg'
+                          src={
+                            process.env.NEXT_PUBLIC_API_URL +
+                            currentUser?.profile_pic
+                          }
                           alt='Profile'
                           className='w-10 h-10 rounded-full object-cover'
                           width={50}
@@ -102,10 +109,10 @@ export default function Navbar() {
                         />
                         <div>
                           <p className='font-semibold text-gray-900'>
-                            Applepeo Abrharim
+                            {currentUser?.full_name}
                           </p>
                           <p className='text-sm text-gray-500'>
-                            jothugudg@gmail.com
+                            {currentUser?.email}
                           </p>
                         </div>
                       </Link>
@@ -113,25 +120,6 @@ export default function Navbar() {
 
                     {/* Menu Items */}
                     <div className='py-2 space-y-1.5'>
-                      {/* Settings - Highlighted */}
-                      {/* <button
-                        onClick={() => handleMenuItemClick("Settings")}
-                        className='w-full flex items-center space-x-3 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors'
-                      >
-                        <Settings className='w-4 h-4' />
-                        <span className='font-medium'>Settings</span>
-                      </button> */}
-
-                      {/* Payment Details */}
-                      <button
-                        onClick={() => handleMenuItemClick("Payment Details")}
-                        className='w-full flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors'
-                      >
-                        <CreditCard className='w-4 h-4' />
-                        <span>Payment Details</span>
-                      </button>
-
-                      {/* Invoice Details */}
                       <Link
                         href='/invoice-details'
                         // onClick={() => handleMenuItemClick("Invoice Details")}
@@ -143,8 +131,8 @@ export default function Navbar() {
 
                       {/* Log Out */}
                       <button
-                        onClick={() => handleMenuItemClick("Log Out")}
-                        className='w-full flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors'
+                        onClick={() => handleLogout()}
+                        className='w-full flex items-center space-x-3 px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer'
                       >
                         <LogOut className='w-4 h-4' />
                         <span>Log Out</span>
@@ -155,15 +143,12 @@ export default function Navbar() {
               </div>
             ) : (
               <>
-                <Button
-                  variant='ghost'
-                  className='text-gray-700 hover:bg-gray-100'
+                <Link
+                  href={"/login"}
+                  className='text-medium text-base text-gray-700 bg-gray-100 border border-gray-300 hover:bg-gray-50 px-2.5 py-1 rounded-lg'
                 >
                   Log In
-                </Button>
-                <Button className='bg-blue-600 hover:bg-blue-700 text-white'>
-                  Sign Up
-                </Button>
+                </Link>
               </>
             )}
           </div>

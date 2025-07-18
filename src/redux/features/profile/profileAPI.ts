@@ -5,6 +5,9 @@ const profileAPI = baseAPI.injectEndpoints({
     getProfile: builder.query({
       query: () => ({
         url: "api/v1/account/update-profile/",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
         method: "GET",
       }),
     }),

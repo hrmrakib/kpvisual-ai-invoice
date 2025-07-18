@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check } from "lucide-react";
+import { useUpgradePlanMutation } from "@/redux/features/upgradePlan/upgradePlan";
+import { toast } from "sonner";
 
 interface PricingPlan {
   name: string;
@@ -16,6 +18,7 @@ interface PricingPlan {
 
 export default function PricingPage() {
   const [isYearly, setIsYearly] = useState(true);
+  const [upgradePlan] = useUpgradePlanMutation();
 
   const plans: PricingPlan[] = [
     {
@@ -62,9 +65,19 @@ export default function PricingPage() {
     },
   ];
 
-  const handlePlanSelect = (planName: string) => {
-    console.log(`Selected plan: ${planName}`);
-    // In a real app, this would handle plan selection/checkout
+  const handlePayment = async () => {
+    const res = await upgradePlan({
+      plan_id: 2,
+      is_yearly: true,
+    }).unwrap();
+
+    console.log(res);
+
+    if (res?.success) {
+      window.location.href = res?.checkout_url;
+    } else {
+      toast.error(res?.message);
+    }
   };
 
   return (
@@ -177,7 +190,7 @@ export default function PricingPage() {
 
                 {/* CTA Button */}
                 <button
-                  onClick={() => handlePlanSelect(plan.name)}
+                  onClick={() => handlePayment()}
                   className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors duration-200 cursor-pointer ${
                     plan.isPopular
                       ? "bg-blue-600 hover:bg-blue-700 text-white"

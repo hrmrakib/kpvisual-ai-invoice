@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Providers from "@/redux/features/Providers";
+import { Toaster } from "sonner";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -32,6 +33,7 @@ export default function RootLayout({
       <body
         className={`${nunitoSan.variable} ${geistMono.variable} antialiased`}
       >
+        <Toaster position='top-center' />
         <Providers>
           <Navbar />
           {children}
