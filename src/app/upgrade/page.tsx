@@ -73,6 +73,11 @@ export default function PricingPage() {
 
     console.log(res);
 
+    // if not login redirect to login
+    if(!res?.success) {
+      window.location.href = "/login";
+    }
+
     if (res?.success) {
       window.location.href = res?.checkout_url;
     } else {
