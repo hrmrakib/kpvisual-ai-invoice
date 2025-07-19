@@ -5,76 +5,86 @@ import Link from "next/link";
 import { ArrowLeft, Check } from "lucide-react";
 import { useUpgradePlanMutation } from "@/redux/features/upgradePlan/upgradePlan";
 import { toast } from "sonner";
+import { useGetSubscriptionQuery } from "@/redux/features/subscription/subscriptionAPI";
 
 interface PricingPlan {
+  id: number;
   name: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  uploads: string;
+  monthly_price: string | number;
+  yearly_price: number;
+  invoice_limit: number;
+  bulk_upload_limit: number;
+  ai_level: string;
+  can_download_report: boolean;
+  info: string;
   description: string;
   features: string[];
-  isPopular?: boolean;
+  is_popular: boolean;
 }
 
 export default function PricingPage() {
   const [isYearly, setIsYearly] = useState(true);
   const [upgradePlan] = useUpgradePlanMutation();
 
-  const plans: PricingPlan[] = [
-    {
-      name: "Basic Plan",
-      monthlyPrice: 2.0,
-      yearlyPrice: 1.4,
-      uploads: "100",
-      description:
-        "Let top creative talent come to you by posting your job listing on #1 Design Jobs Board.",
-      features: [
-        "Basic AI error detection",
-        "Priority processing queue",
-        "Bulk upload (up to 100 files at once)",
-      ],
-    },
-    {
-      name: "Pro Plan",
-      monthlyPrice: 8.99,
-      yearlyPrice: 6.29,
-      uploads: "500",
-      description:
-        "Easily search and recruit available designers for hire based on your ideal qualifications.",
-      features: [
-        "Full AI-powered invoice validation",
-        "Bulk upload (up to 500 files at once)",
-        "PDF report download",
-        "+100 extra invoices",
-      ],
-      isPopular: true,
-    },
-    {
-      name: "Enterprise Plan",
-      monthlyPrice: 13.99,
-      yearlyPrice: 9.79,
-      uploads: "Unlimited",
-      description:
-        "Easily search and recruit available designers for hire based on your ideal qualifications.",
-      features: [
-        "All Pro features",
-        "Fraud risk score & vendor validation",
-        "Unlimited invoice",
-        "Dedicated account manager",
-      ],
-    },
-  ];
+  // const plans: PricingPlan[] = [
+  //   {
+  //     name: "Basic Plan",
+  //     monthlyPrice: 2.0,
+  //     yearlyPrice: 1.4,
+  //     uploads: "100",
+  //     description:
+  //       "Let top creative talent come to you by posting your job listing on #1 Design Jobs Board.",
+  //     features: [
+  //       "Basic AI error detection",
+  //       "Priority processing queue",
+  //       "Bulk upload (up to 100 files at once)",
+  //     ],
+  //   },
+  //   {
+  //     name: "Pro Plan",
+  //     monthlyPrice: 8.99,
+  //     yearlyPrice: 6.29,
+  //     uploads: "500",
+  //     description:
+  //       "Easily search and recruit available designers for hire based on your ideal qualifications.",
+  //     features: [
+  //       "Full AI-powered invoice validation",
+  //       "Bulk upload (up to 500 files at once)",
+  //       "PDF report download",
+  //       "+100 extra invoices",
+  //     ],
+  //     isPopular: true,
+  //   },
+  //   {
+  //     name: "Enterprise Plan",
+  //     monthlyPrice: 13.99,
+  //     yearlyPrice: 9.79,
+  //     uploads: "Unlimited",
+  //     description:
+  //       "Easily search and recruit available designers for hire based on your ideal qualifications.",
+  //     features: [
+  //       "All Pro features",
+  //       "Fraud risk score & vendor validation",
+  //       "Unlimited invoice",
+  //       "Dedicated account manager",
+  //     ],
+  //   },
+  // ];
+
+  const { data: plans } = useGetSubscriptionQuery({});
+
+  console.log(plans);
 
   const handlePayment = async () => {
     const res = await upgradePlan({
       plan_id: 2,
-      is_yearly: true,
+      is_yearly: isYearly,
     }).unwrap();
 
     console.log(res);
 
     // if not login redirect to login
-    if(!res?.success) {
+    if (!res?.success) {
       window.location.href = "/login";
     }
 
@@ -158,15 +168,15 @@ export default function PricingPage() {
 
         {/* Pricing Cards */}
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8'>
-          {plans.map((plan, index) => (
+          {plans?.map((plan: PricingPlan, index: number) => (
             <div
               key={index}
               className={`relative bg-white rounded-2xl shadow-lg p-6 md:p-8 ${
-                plan.isPopular ? "ring-2 ring-blue-600 scale-105" : ""
+                plan?.is_popular ? "ring-2 ring-blue-600 scale-105" : ""
               } transition-transform hover:scale-105`}
             >
               {/* Popular Badge */}
-              {plan.isPopular && (
+              {plan?.is_popular && (
                 <div className='absolute -top-4 left-1/2 transform -translate-x-1/2'>
                   <span className='bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-medium'>
                     Most Popular
@@ -176,28 +186,23 @@ export default function PricingPage() {
 
               {/* Plan Header */}
               <div className='text-center mb-6'>
-                <h3 className='text-xl md:text-2xl font-bold text-gray-900 mb-4'>
+                <h3 className='text-xl capitalize md:text-2xl font-bold text-gray-900 mb-4'>
                   {plan.name}
                 </h3>
 
                 <div className='mb-2'>
                   <span className='text-4xl md:text-5xl font-bold text-gray-900'>
-                    $
-                    {isYearly
-                      ? plan.yearlyPrice.toFixed(2)
-                      : plan.monthlyPrice.toFixed(2)}
+                    ${isYearly ? plan?.yearly_price : plan?.monthly_price}
                   </span>
                 </div>
 
-                <p className='text-gray-600 font-medium mb-6'>
-                  Monthly Invoice Uploads {plan.uploads}
-                </p>
+                <p className='text-gray-600 font-medium mb-6'>{plan?.info}</p>
 
                 {/* CTA Button */}
                 <button
                   onClick={() => handlePayment()}
                   className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors duration-200 cursor-pointer ${
-                    plan.isPopular
+                    plan?.is_popular
                       ? "bg-blue-600 hover:bg-blue-700 text-white"
                       : "border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
                   }`}
@@ -208,12 +213,12 @@ export default function PricingPage() {
 
               {/* Description */}
               <p className='text-gray-600 text-sm md:text-base mb-6 leading-relaxed'>
-                {plan.description}
+                {plan?.description}
               </p>
 
               {/* Features */}
               <div className='space-y-3'>
-                {plan.features.map((feature, featureIndex) => (
+                {plan?.features?.map((feature, featureIndex) => (
                   <div
                     key={featureIndex}
                     className='flex items-start space-x-3'
