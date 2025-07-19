@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 "use client";
@@ -11,6 +12,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentUser } from "@/redux/features/auth/userSlice";
+import { useGetProfileQuery } from "@/redux/features/profile/profileAPI";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,6 +22,13 @@ export default function Navbar() {
   const dispatch = useDispatch();
 
   const currentUser = useSelector((state: any) => state?.currentUser?.user);
+  const { data: userProfile } = useGetProfileQuery({});
+
+  useEffect(() => {
+    if (userProfile) {
+      dispatch(setCurrentUser(userProfile));
+    }
+  }, [userProfile]);
 
   // Close dropdown when clicking outside
   useEffect(() => {

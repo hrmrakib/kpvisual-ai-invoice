@@ -3,30 +3,25 @@
 import type React from "react";
 
 import { useState, useRef } from "react";
-import { Eye, EyeOff, Camera, ArrowLeft, Upload, X } from "lucide-react";
+import { Camera, ArrowLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useGetProfileQuery } from "@/redux/features/profile/profileAPI";
+import {
+  useGetProfileQuery,
+  useUpdateProfileMutation,
+} from "@/redux/features/profile/profileAPI";
+import { useDispatch } from "react-redux";
+import { setCurrentUser } from "@/redux/features/auth/userSlice";
+import { toast } from "sonner";
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
-  const [showPasswords, setShowPasswords] = useState({
-    current: false,
-    old: false,
-    new: false,
-    confirm: false,
-  });
 
   const [editForm, setEditForm] = useState({
     name: "",
-    oldPassword: "",
-    newPassword: "",
-    confirmPassword: "",
   });
 
-  const { data: profile } = useGetProfileQuery({});
-
-  console.log(profile);
+  const { data: profile, refetch } = useGetProfileQuery({});
 
   const [imageUpload, setImageUpload] = useState({
     file: null as File | null,
@@ -36,13 +31,8 @@ export default function ProfilePage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
-    setShowPasswords((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
-  };
+  const [updateProfile] = useUpdateProfileMutation();
+  const dispatch = useDispatch();
 
   const handleInputChange = (field: string, value: string) => {
     setEditForm((prev) => ({
@@ -97,24 +87,6 @@ export default function ProfilePage() {
     }
   };
 
-  const uploadImage = async (file: File): Promise<string> => {
-    // Simulate image upload to server
-    setImageUpload((prev) => ({ ...prev, isUploading: true }));
-
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    // In a real app, you would upload to your server/cloud storage
-    // For demo, we'll use the preview URL
-    const reader = new FileReader();
-    return new Promise((resolve) => {
-      reader.onload = (e) => {
-        setImageUpload((prev) => ({ ...prev, isUploading: false }));
-        resolve(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
   const handleEditProfile = () => {
     setIsEditing(true);
   };
@@ -123,23 +95,25 @@ export default function ProfilePage() {
     setIsLoading(true);
 
     try {
-      // Upload image if there's a new one
-      // let newImageUrl = profile.profileImage;
-      // if (imageUpload.file) {
-      //   newImageUrl = await uploadImage(imageUpload.file);
-      // }
+      const formData = new FormData();
 
-      // Simulate API call for profile update
-      // await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Check if an image is uploaded
+      if (editForm?.name) {
+        formData.append("full_name", editForm?.name);
+      }
+      if (imageUpload?.file) {
+        formData.append("profile_pic", imageUpload?.file);
+      }
 
-      // Update profile with new data
-      // setProfile((prev) => ({
-      //   ...prev,
-      //   name: editForm.name,
-      //   profileImage: newImageUrl,
-      // }));
+      const res = await updateProfile(formData).unwrap();
+      console.log(res);
 
-      // Reset image upload state
+      if (res?.success) {
+        refetch();
+        toast.success(res.message);
+        dispatch(setCurrentUser(profile));
+      }
+
       setImageUpload({
         file: null,
         preview: null,
@@ -148,9 +122,6 @@ export default function ProfilePage() {
 
       setIsLoading(false);
       setIsEditing(false);
-
-      // Show success message
-      alert("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating profile:", error);
       setIsLoading(false);
@@ -162,9 +133,6 @@ export default function ProfilePage() {
     // Reset form to original values
     setEditForm({
       name: profile.name,
-      oldPassword: "223**********8",
-      newPassword: "223**********8",
-      confirmPassword: "223**********8",
     });
 
     // Reset image upload
@@ -183,6 +151,8 @@ export default function ProfilePage() {
     }
     return profile?.profile_pic;
   };
+
+  console.log(profile);
 
   return (
     <div className='min-h-[82vh] bg-[#E9E9E9] py-8 px-4'>
@@ -316,20 +286,6 @@ export default function ProfilePage() {
                   />
                 </div>
 
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    Enter Your Password
-                  </label>
-                  <div className='relative'>
-                    <input
-                      type={"text"}
-                      value={profile?.mobile_no}
-                      readOnly
-                      className='w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed'
-                    />
-                  </div>
-                </div>
-
                 <button
                   onClick={handleEditProfile}
                   className='w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200'
@@ -349,90 +305,12 @@ export default function ProfilePage() {
                         handleInputChange("name", e.target.value)
                       }
                       className='w-full px-4 py-3 border-2 border-blue-500 rounded-lg focus:outline-none focus:border-blue-600'
-                      placeholder='Enter your name'
+                      placeholder={profile?.full_name}
                     />
                     {/* Blue frame indicator */}
                     <div className='absolute -top-2 left-3 bg-blue-500 text-white text-xs px-2 py-0.5 rounded'>
-                      Frame 2147226636
+                      Name
                     </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    Old Password
-                  </label>
-                  <div className='relative'>
-                    <input
-                      type={showPasswords.old ? "text" : "password"}
-                      value={editForm.oldPassword}
-                      onChange={(e) =>
-                        handleInputChange("oldPassword", e.target.value)
-                      }
-                      className='w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500'
-                    />
-                    <button
-                      onClick={() => togglePasswordVisibility("old")}
-                      className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600'
-                    >
-                      {showPasswords.old ? (
-                        <EyeOff className='w-5 h-5' />
-                      ) : (
-                        <Eye className='w-5 h-5' />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    New Password
-                  </label>
-                  <div className='relative'>
-                    <input
-                      type={showPasswords.new ? "text" : "password"}
-                      value={editForm.newPassword}
-                      onChange={(e) =>
-                        handleInputChange("newPassword", e.target.value)
-                      }
-                      className='w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500'
-                    />
-                    <button
-                      onClick={() => togglePasswordVisibility("new")}
-                      className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600'
-                    >
-                      {showPasswords.new ? (
-                        <EyeOff className='w-5 h-5' />
-                      ) : (
-                        <Eye className='w-5 h-5' />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    Confirm Password
-                  </label>
-                  <div className='relative'>
-                    <input
-                      type={showPasswords.confirm ? "text" : "password"}
-                      value={editForm.confirmPassword}
-                      onChange={(e) =>
-                        handleInputChange("confirmPassword", e.target.value)
-                      }
-                      className='w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500'
-                    />
-                    <button
-                      onClick={() => togglePasswordVisibility("confirm")}
-                      className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600'
-                    >
-                      {showPasswords.confirm ? (
-                        <EyeOff className='w-5 h-5' />
-                      ) : (
-                        <Eye className='w-5 h-5' />
-                      )}
-                    </button>
                   </div>
                 </div>
 

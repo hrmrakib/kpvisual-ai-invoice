@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 
 "use client";
@@ -23,7 +24,7 @@ export default function HomePage() {
   const [uploadFile] = useUploadFileMutation();
   const dispatch = useDispatch();
 
-  const { data: userProfile } = useGetProfileQuery({});
+  const { data: userProfile, refetch } = useGetProfileQuery({});
 
   useEffect(() => {
     if (userProfile) {

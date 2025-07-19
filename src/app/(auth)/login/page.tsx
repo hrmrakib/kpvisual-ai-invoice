@@ -8,6 +8,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { useLoginMutation } from "@/redux/features/auth/authAPI";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { setCurrentUser } from "@/redux/features/auth/userSlice";
 
 export default function SignInPage() {
   const [formData, setFormData] = useState({
@@ -21,6 +23,7 @@ export default function SignInPage() {
   const [submitSuccess] = useState(false);
   const [login] = useLoginMutation();
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -70,10 +73,9 @@ export default function SignInPage() {
       }).unwrap();
 
       if (response?.success) {
+        dispatch(setCurrentUser(response?.user));
         localStorage.setItem("access_token", response?.access_token);
         localStorage.setItem("refresh_token", response?.refresh_token);
-        localStorage.setItem("kpvisual_ai_invoice", response?.user);
-
         toast.success(response.message);
         router.push("/");
       }
