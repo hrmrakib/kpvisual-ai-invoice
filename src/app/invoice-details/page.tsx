@@ -129,7 +129,7 @@ export default function InvoiceDetailsPage() {
             </div>
 
             {/* Search and Filter - Mobile Responsive */}
-            <div className='flex flex-col sm:flex-row gap-4 mb-6'>
+            {/*<div className='flex flex-col sm:flex-row gap-4 mb-6'>
               <div className='relative flex-1'>
                 <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4' />
                 <input
@@ -153,7 +153,7 @@ export default function InvoiceDetailsPage() {
                   <option value='altered'>Altered</option>
                 </select>
               </div>
-            </div>
+             </div>  */}
           </div>
 
           {/* Desktop Table */}

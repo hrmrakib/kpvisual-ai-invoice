@@ -5,9 +5,6 @@ const subscriptionAPI = baseAPI.injectEndpoints({
     getSubscription: builder.query({
       query: () => ({
         url: "api/v1/subscription/plans/",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
         method: "GET",
       }),
     }),
