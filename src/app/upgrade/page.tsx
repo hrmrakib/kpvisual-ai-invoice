@@ -75,13 +75,11 @@ export default function PricingPage() {
 
   console.log(plans);
 
-  const handlePayment = async () => {
+  const handlePayment = async (id: number | string) => {
     const res = await upgradePlan({
-      plan_id: 2,
+      plan_id: id,
       is_yearly: isYearly,
     }).unwrap();
-
-    console.log(res);
 
     // if not login redirect to login
     if (!res?.success) {
@@ -200,7 +198,7 @@ export default function PricingPage() {
 
                 {/* CTA Button */}
                 <button
-                  onClick={() => handlePayment()}
+                  onClick={() => handlePayment(plan?.id)}
                   className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors duration-200 cursor-pointer ${
                     plan?.is_popular
                       ? "bg-blue-600 hover:bg-blue-700 text-white"
