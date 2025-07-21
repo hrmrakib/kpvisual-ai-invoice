@@ -110,7 +110,7 @@ export default function HomePage() {
       setIsUploading(false);
     } catch (error) {
       console.error("Verification failed:", error);
-      // toast.error("Upgrade your plan to verify invoices.");
+      toast.error("Something went wrong. Please try again later.");
       setIsUploading(false);
       setFiles([]);
     }

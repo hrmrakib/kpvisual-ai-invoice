@@ -367,7 +367,7 @@ export default function ResultsPage() {
                                         <button
                                           onClick={() =>
                                             window.open(
-                                              `${process.env.NEXT_PUBLIC_BASE_URL}${invoice.invoice_image}`,
+                                              `${process.env.NEXT_PUBLIC_API_URL}${invoice.invoice_image}`,
                                               "_blank"
                                             )
                                           }

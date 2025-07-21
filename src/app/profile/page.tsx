@@ -145,14 +145,7 @@ export default function ProfilePage() {
     setIsEditing(false);
   };
 
-  const getCurrentProfileImage = () => {
-    if (imageUpload?.preview) {
-      return imageUpload?.preview;
-    }
-    return profile?.profile_pic;
-  };
-
-  console.log(profile);
+  
 
   return (
     <div className='min-h-[82vh] bg-[#E9E9E9] py-8 px-4'>
@@ -175,9 +168,11 @@ export default function ProfilePage() {
             <div className='relative inline-block mb-4'>
               <div className='w-24 h-24 rounded-full overflow-hidden mx-auto border-4 border-gray-200'>
                 <Image
-                  src={`${
-                    process.env.NEXT_PUBLIC_IMAGE_URL
-                  }${getCurrentProfileImage()}`}
+                  src={
+                    imageUpload.preview
+                      ? imageUpload.preview
+                      : `${process.env.NEXT_PUBLIC_IMAGE_URL}${profile?.profile_pic}`
+                  }
                   alt='Profile'
                   className='w-full h-full object-cover'
                   width={96}
