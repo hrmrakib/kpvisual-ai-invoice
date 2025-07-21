@@ -4,21 +4,41 @@
 import type React from "react";
 
 import { useState, useEffect, useRef } from "react";
-import { FileText, Loader2 } from "lucide-react";
+import { Clock, Eye, FileText, Loader2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setInvoiceResult } from "@/redux/features/invoiceResultSlice";
 import { useUploadFileMutation } from "@/redux/features/fileUploadAPI";
 import { useRouter } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { CheckCircle, XCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface InvoiceAnalysisResult {
+  filename?: string;
   success: boolean;
-  invoice_id: string;
-  status: "authentic" | "altered" | string;
-  message: string;
-  invoice_image: string | null;
-  ela_image: string | null;
-  user: string;
-  checked_at: string;
+  invoice_id?: string;
+  status?: "authentic" | "altered" | "unknown";
+  message?: string;
+  invoice_image?: string;
+  ela_image?: string | null;
+  checked_at?: string;
+  total?: number;
+  processed?: number;
+  results?: InvoiceAnalysisResult[];
 }
 
 interface InvoiceResultState {
@@ -38,6 +58,8 @@ export default function ResultsPage() {
   const dispatch = useDispatch();
   const router = useRouter();
   const [uploadFile] = useUploadFileMutation();
+
+  console.log("invoiceResult", invoiceResult?.invoiceResult?.results);
 
   useEffect(() => {
     // Get analysis result from sessionStorage
@@ -108,17 +130,70 @@ export default function ResultsPage() {
   //   fileInputRef.current?.click();
   // };
 
-  const getStatusBadgeColor = (status: string | null | undefined) => {
+  // const getStatusBadgeColor = (status: string | null | undefined) => {
+  //   switch (status) {
+  //     case "authentic":
+  //       return "bg-green-600 text-white  border-green-200";
+  //     case "altered":
+  //       return "bg-red-600 text-white border-red-200";
+  //     case "suspicious":
+  //       return "bg-yellow-100 text-yellow-800 border-yellow-200";
+  //     default:
+  //       return "bg-gray-100 text-gray-800 border-gray-200";
+  //   }
+  // };
+
+  // temp code
+
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case "authentic":
-        return "bg-green-600 text-white  border-green-200";
+        return <CheckCircle className='h-4 w-4 text-green-600' />;
       case "altered":
-        return "bg-red-600 text-white border-red-200";
-      case "suspicious":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return <XCircle className='h-4 w-4 text-red-600' />;
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return <Clock className='h-4 w-4 text-yellow-600' />;
     }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "authentic":
+        return (
+          <Badge
+            variant='default'
+            className='bg-green-100 text-green-800 hover:bg-green-100'
+          >
+            Authentic
+          </Badge>
+        );
+      case "altered":
+        return (
+          <Badge
+            variant='destructive'
+            className='bg-red-100 text-red-800 hover:bg-red-100'
+          >
+            Altered
+          </Badge>
+        );
+      default:
+        return <Badge variant='secondary'>Unknown</Badge>;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const truncateFilename = (filename: string, maxLength = 25) => {
+    if (filename.length <= maxLength) return filename;
+    return filename.substring(0, maxLength - 3) + "...";
   };
 
   return (
@@ -174,7 +249,7 @@ export default function ResultsPage() {
           {/* Left column - Analysis results */}
           <div className='lg:col-span-1 space-y-8'>
             <div className='mb-8 md:mb-12'>
-              <h1 className='max-w-2xl text-3xl md:text-4xl lg:text-[60px] font-bold text-[#101010] mb-4'>
+              <h1 className='max-w-2xl mx-auto text-3xl md:text-4xl lg:text-[60px] text-center font-bold text-[#101010] mb-4'>
                 Invoice Analysis Result
               </h1>
               <p className='text-[#6E6E6E] text-center text-base md:text-lg'>
@@ -185,7 +260,7 @@ export default function ResultsPage() {
 
             {/* Status section */}
             <div className='bg-[#E9E9E9] rounded-2xl flex flex-col items-center justify-center'>
-              <div className='flex items-center space-x-4 mb-6'>
+              {/* <div className='flex items-center space-x-4 mb-6'>
                 <div className='flex items-center justify-start space-x-3'>
                   <div className='w-10 h-10 rounded-full flex items-center justify-center'>
                     <svg
@@ -214,14 +289,194 @@ export default function ResultsPage() {
                     </span>
                   </div>
                 </div>
+              </div> */}
+
+              <div className='w-full p-6 space-y-6'>
+                <Card>
+                  <CardHeader>
+                    <div className='flex items-center justify-between'>
+                      <div>
+                        <CardTitle className='text-2xl font-bold'>
+                          Invoice Processing Results
+                        </CardTitle>
+                        <CardDescription className='text-lg mt-2'>
+                          {invoiceResult?.invoiceResult?.message}
+                        </CardDescription>
+                      </div>
+                      <div className='flex items-center gap-4 text-sm text-muted-foreground'>
+                        <div className='flex items-center gap-2'>
+                          <FileText className='h-4 w-4' />
+                          <span className='text-gray-500 font-medium'>
+                            Total:
+                            {invoiceResult?.invoiceResult?.total}
+                          </span>
+                        </div>
+                        <div className='flex items-center gap-2'>
+                          <CheckCircle className='h-4 w-4 text-green-600' />
+                          <span className='text-gray-500 font-medium'>
+                            Processed:
+                            {invoiceResult?.invoiceResult?.processed}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className='rounded-lg border overflow-hidden'>
+                      <Table>
+                        <TableHeader>
+                          <TableRow className='bg-muted/50'>
+                            <TableHead className='font-bold text-gray-800'>
+                              Invoice ID
+                            </TableHead>
+                            <TableHead className='font-bold text-gray-800'>
+                              Filename
+                            </TableHead>
+                            <TableHead className='font-bold text-gray-800'>
+                              Status
+                            </TableHead>
+                            <TableHead className='font-bold text-gray-800'>
+                              Checked At
+                            </TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {invoiceResult?.invoiceResult?.results?.map(
+                            (invoice: InvoiceAnalysisResult, index: number) => (
+                              <TableRow
+                                key={index}
+                                className='hover:bg-muted/30 transition-colors'
+                              >
+                                <TableCell>
+                                  <div className='font-mono font-medium text-sm'>
+                                    {invoice?.invoice_id}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className='flex flex-col gap-1'>
+                                    <div className='flex items-center gap-2'>
+                                      <span
+                                        className='font-medium text-sm'
+                                        title={invoice?.filename}
+                                      >
+                                        {truncateFilename(
+                                          invoice?.filename ?? ""
+                                        )}
+                                      </span>
+                                      {invoice.invoice_image && (
+                                        <button
+                                          onClick={() =>
+                                            window.open(
+                                              `${process.env.NEXT_PUBLIC_BASE_URL}${invoice.invoice_image}`,
+                                              "_blank"
+                                            )
+                                          }
+                                          className='inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors'
+                                          title='View invoice image/PDF'
+                                        >
+                                          <Eye className='h-3 w-3' />
+                                          View
+                                        </button>
+                                      )}
+                                    </div>
+
+                                    <span
+                                      className='text-xs text-muted-foreground line-clamp-2'
+                                      title={invoice?.message}
+                                    >
+                                      {invoice?.message}
+                                    </span>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className='flex items-center gap-2'>
+                                    {getStatusIcon(
+                                      invoice?.status ?? "unknown"
+                                    )}
+                                    {getStatusBadge(
+                                      invoice?.status ?? "unknown"
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className='text-sm text-muted-foreground'>
+                                    {formatDate(invoice?.checked_at ?? "")}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            )
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    <div className='mt-6 grid grid-cols-1 md:grid-cols-3 gap-4'>
+                      <Card className='border-green-200 bg-green-50'>
+                        <CardContent className='p-4'>
+                          <div className='flex items-center gap-2'>
+                            <CheckCircle className='h-5 w-5 text-green-600' />
+                            <div>
+                              <p className='text-sm font-medium text-green-800'>
+                                Authentic
+                              </p>
+                              <p className='text-2xl font-bold text-green-900'>
+                                {invoiceResult?.invoiceResult?.results?.filter(
+                                  (r) => r.status === "authentic"
+                                ).length ?? 0}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className='border-red-200 bg-red-50'>
+                        <CardContent className='p-4'>
+                          <div className='flex items-center gap-2'>
+                            <XCircle className='h-5 w-5 text-red-600' />
+                            <div>
+                              <p className='text-sm font-medium text-red-800'>
+                                Altered
+                              </p>
+                              <p className='text-2xl font-bold text-red-900'>
+                                {invoiceResult?.invoiceResult?.results?.filter(
+                                  (r) => r.status === "altered"
+                                ).length ?? 0}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className='border-blue-200 bg-blue-50'>
+                        <CardContent className='p-4'>
+                          <div className='flex items-center gap-2'>
+                            <FileText className='h-5 w-5 text-blue-600' />
+                            <div>
+                              <p className='text-sm font-medium text-blue-800'>
+                                Success Rate
+                              </p>
+                              <p className='text-2xl font-bold text-blue-900'>
+                                {Math.round(
+                                  ((invoiceResult?.invoiceResult?.results?.filter(
+                                    (r) => r.success
+                                  ).length ?? 0) /
+                                    (invoiceResult?.invoiceResult?.total ??
+                                      1)) *
+                                    100
+                                )}
+                                %
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               <div className='flex flex-col sm:flex-row gap-4 mt-10'>
-                <button
-                  // onClick={handleUploadAnotherClick}
-                  // disabled={isUploading}
-                  className='relative bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200'
-                >
+                <button className='relative bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200'>
                   <input
                     ref={fileInputRef}
                     type='file'

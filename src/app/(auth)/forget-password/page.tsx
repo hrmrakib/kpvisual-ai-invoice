@@ -33,10 +33,10 @@ export default function ForgetPassword() {
     try {
       const response = await forgotPassword({ email }).unwrap();
 
-      if (response.status === "success") {
+      if (response?.success) {
         localStorage.setItem("email", email);
         toast.success("OTP sent successfully!");
-        router.push("/verify-otp");
+        router.push("/verify-otp?email=" + email);
       }
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -95,7 +95,7 @@ export default function ForgetPassword() {
               <button
                 type='submit'
                 disabled={isSubmitting}
-                className='w-full bg-[#0249E1] text-secondary text-lg font-medium py-3 px-4 rounded-full transition duration-200 ease-in-out'
+                className='w-full bg-[#0249E1] text-secondary text-lg font-medium py-3 px-4 rounded-full cursor-pointer transition duration-200 ease-in-out'
               >
                 {isSubmitting ? "Reset Password ..." : "Send OTP"}
               </button>

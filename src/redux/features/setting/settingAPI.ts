@@ -11,6 +11,7 @@ const settingAPI = baseAPI.injectEndpoints({
         method: "GET",
       }),
     }),
+    
     getTermsConditions: builder.query({
       query: () => ({
         url: "api/v1/privacy_policy/terms-conditions/",
@@ -20,6 +21,7 @@ const settingAPI = baseAPI.injectEndpoints({
         method: "GET",
       }),
     }),
+
     getPrivacyPolicy: builder.query({
       query: () => ({
         url: "api/v1/privacy_policy/privacy-policy/",

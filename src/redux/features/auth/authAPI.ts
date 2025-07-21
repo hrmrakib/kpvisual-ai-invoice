@@ -26,6 +26,8 @@ const AuthenticationAPI = baseAPI.injectEndpoints({
       }),
     }),
 
+    // api/v1/account/verify-forget-password-otp/
+
     sendOtp: builder.mutation({
       query: (body) => ({
         url: "/auth/send-otp",
@@ -36,7 +38,7 @@ const AuthenticationAPI = baseAPI.injectEndpoints({
 
     resendOtp: builder.mutation({
       query: (body) => ({
-        url: "api/v1/account/resend-otp/",
+        url: "api/v1/account/forget-password/",
         method: "POST",
         body,
       }),

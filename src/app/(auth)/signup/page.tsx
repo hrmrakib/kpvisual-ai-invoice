@@ -1,5 +1,9 @@
 "use client";
 
+/**
+ * This file is for signup verification
+ */
+
 import type React from "react";
 
 import { useRef, useState, type FormEvent } from "react";
@@ -100,7 +104,7 @@ export default function SignUpPage() {
       if (response?.success) {
         toast.success(response?.message);
 
-        router.push("/verify-otp");
+        router.push("/verify-email");
       }
 
       console.log(response);
