@@ -19,7 +19,7 @@ const settingAPI = baseAPI.injectEndpoints({
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
         method: "GET",
-      }),
+      }), 
     }),
 
     getPrivacyPolicy: builder.query({

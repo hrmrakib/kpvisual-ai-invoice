@@ -108,7 +108,7 @@ export default function HomePage() {
       }
 
       setIsUploading(false);
-    } catch (error) {
+    } catch (error) { 
       console.error("Verification failed:", error);
       toast.error("Something went wrong. Please try again later.");
       setIsUploading(false);

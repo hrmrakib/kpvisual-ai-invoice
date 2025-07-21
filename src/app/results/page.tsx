@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/table";
 import { CheckCircle, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 interface InvoiceAnalysisResult {
   filename?: string;
@@ -58,6 +59,7 @@ export default function ResultsPage() {
   const dispatch = useDispatch();
   const router = useRouter();
   const [uploadFile] = useUploadFileMutation();
+  const [files, setFiles] = useState<File[]>([]);
 
   console.log("invoiceResult", invoiceResult?.invoiceResult?.results);
 
@@ -70,41 +72,49 @@ export default function ResultsPage() {
   }, []);
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0]);
+    if (e.target.files) {
+      handleFile(e.target.files);
     }
   };
 
-  const handleFile = (selectedFile: File) => {
-    // Validate file type
+  const handleFile = (selectedFiles: FileList) => {
     const allowedTypes = [
       "application/pdf",
       "image/jpeg",
       "image/png",
       "image/jpg",
     ];
-    if (!allowedTypes.includes(selectedFile.type)) {
-      alert("Please upload a PDF or image file (JPEG, PNG)");
-      return;
-    }
+    const maxFileSize = 10 * 1024 * 1024;
 
-    // Validate file size (max 10MB)
-    if (selectedFile.size > 10 * 1024 * 1024) {
-      alert("File size must be less than 10MB");
-      return;
-    }
+    const validFiles: File[] = [];
 
-    setUploadingFile(selectedFile);
-    verifyInvoice(selectedFile);
+    Array.from(selectedFiles).forEach((file) => {
+      if (!allowedTypes.includes(file.type)) {
+        toast.error(`${file.name} is not a valid file type`);
+        return;
+      }
+      if (file.size > maxFileSize) {
+        toast.error(`${file.name} exceeds the 10MB limit`);
+        return;
+      }
+      validFiles.push(file);
+    });
+
+    if (validFiles.length > 0) {
+      setFiles(validFiles);
+      verifyInvoice(validFiles); // not inside forEach
+    }
   };
 
-  const verifyInvoice = async (file: File) => {
+  const verifyInvoice = async (filesToUpload: File[]) => {
     setIsUploading(true);
 
     try {
       const formData = new FormData();
 
-      formData.append("invoice", file);
+      filesToUpload.forEach((file) => {
+        formData.append("invoices", file);
+      });
 
       const res = await uploadFile(formData).unwrap();
 
@@ -114,15 +124,22 @@ export default function ResultsPage() {
         dispatch(setInvoiceResult(res));
         sessionStorage.setItem("invoiceAnalysisResult", JSON.stringify(res));
         router.push(`/results`);
-        // router.push(`/results/${res.invoiceId}`);
       }
-      console.log(res);
+
       setIsUploading(false);
     } catch (error) {
       console.error("Verification failed:", error);
-      alert("Verification failed. Please try again.");
+      toast.error("Something went wrong. Please try again later.");
       setIsUploading(false);
-      // setFile(null);
+      setFiles([]);
+    }
+  };
+
+  const resetUpload = () => {
+    setFiles([]);
+    setIsUploading(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -371,7 +388,7 @@ export default function ResultsPage() {
                                               "_blank"
                                             )
                                           }
-                                          className='inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors'
+                                          className='inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors cursor-pointer'
                                           title='View invoice image/PDF'
                                         >
                                           <Eye className='h-3 w-3' />
@@ -482,6 +499,7 @@ export default function ResultsPage() {
                     type='file'
                     accept='.pdf,.jpg,.jpeg,.png'
                     onChange={handleFileInput}
+                    multiple
                     className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
                     disabled={isUploading}
                   />
