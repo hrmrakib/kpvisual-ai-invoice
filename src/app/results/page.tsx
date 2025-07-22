@@ -135,14 +135,6 @@ export default function ResultsPage() {
     }
   };
 
-  const resetUpload = () => {
-    setFiles([]);
-    setIsUploading(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
   // const handleUploadAnotherClick = () => {
   //   fileInputRef.current?.click();
   // };
